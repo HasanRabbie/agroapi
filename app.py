@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, Response, json
 import os
 import cv2
 import torch
@@ -26,6 +26,9 @@ model = torch.load('model/vit.pth', map_location=torch.device('cpu'))
 model.eval()
 
 
+
+
+
 def predict_image(image):
     # Apply the same preprocessing transform as before
     transformed_image = transform(image)
@@ -48,7 +51,7 @@ app = Flask(__name__)
 UPLOAD_FOLDER = 'Uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-@app.route('/predict', methods=['POST'])
+@app.route('/pred', methods=['POST'])
 def upload_image():
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'})
@@ -65,11 +68,16 @@ def upload_image():
 
         # Read the image
         im = Image.open(filename)
-        transformed_image = transform(im)
         predictions = predict_image(im)
 
-        return jsonify({'pre': predictions})
+        response = Response(response=json.dumps({'predictions': predictions}), status=200)
+        return response
+
+@app.route('/')
+def hello_world():
+    response = Response(json.dumps({'message': 'Working Ok'}), status=200)
+    return response
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=8080)
