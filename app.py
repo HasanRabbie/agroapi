@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify, send_file, Response, json
 import os
-import cv2
 import torch
 import torchvision.transforms as transforms
 import numpy as np
